@@ -1,0 +1,7 @@
+# Project exclude paths
+/.gradle/
+/build/
+/build/classes/kotlin/jvm/main/
+/build/classes/kotlin/jvm/test/
+/build/js/packages/kojsad/kotlin/
+/build/js/packages/kojsad-test/kotlin/
