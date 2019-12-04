@@ -1,69 +1,76 @@
 package dk.rheasoft.kojsad
 
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class JsonStringDelegate(val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): String = adapter.getString(property.name)
+class JsonString : ReadWriteProperty<ObjectAdapter, String> {
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): String =
+        thisRef.adapter.getString(property.name)
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
-        adapter.setString(property.name, value)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: String) {
+        thisRef.adapter.setString(property.name, value)
     }
 }
 
-class JsonIntDelegate(val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Int = adapter.getNumber(property.name).toInt()
+class JsonInt : ReadWriteProperty<ObjectAdapter, Int> {
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): Int =
+        thisRef.adapter.getNumber(property.name).toInt()
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
-        adapter.setNumber(property.name, value)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: Int) {
+        thisRef.adapter.setNumber(property.name, value)
     }
 }
 
-class JsonLongDelegate(val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Long = adapter.getNumber(property.name).toLong()
+class JsonLong : ReadWriteProperty<ObjectAdapter, Long> {
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): Long =
+        thisRef.adapter.getNumber(property.name).toLong()
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Long) {
-        adapter.setNumber(property.name, value)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: Long) {
+        thisRef.adapter.setNumber(property.name, value)
     }
 }
 
-class JsonDoubleDelegate(val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Double = adapter.getNumber(property.name).toDouble()
+class JsonDouble : ReadWriteProperty<ObjectAdapter, Double> {
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): Double =
+        thisRef.adapter.getNumber(property.name).toDouble()
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
-        adapter.setNumber(property.name, value)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: Double) {
+        thisRef.adapter.setNumber(property.name, value)
     }
 }
 
-class JsonBooleanDelegate(val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Boolean = adapter.getBoolean(property.name)
+class JsonBooleanDelegate  : ReadWriteProperty<ObjectAdapter, Boolean> {
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): Boolean =
+        thisRef.adapter.getBoolean(property.name)
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        adapter.setBoolean(property.name, value)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: Boolean) {
+        thisRef.adapter.setBoolean(property.name, value)
     }
 }
 
-class JsonObjectDelegate<T : ObjectAdapter>(val construct: (adapter: JsonObjectAdapter) -> T,  val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = construct(adapter.getObject(property.name))
+class JsonObject<T : ObjectAdapter>(val construct: (adapter: JsonObjectAdapter) -> T) : ReadWriteProperty<ObjectAdapter, T>{
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): T =
+        construct(thisRef.adapter.getObject(property.name))
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        adapter.setObject(property.name, value.adapter)
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: T) {
+        thisRef.adapter.setObject(property.name, value.adapter)
     }
 }
 
-class JsonListDelegate<T : ObjectAdapter>(val construct: (adapter: JsonObjectAdapter) -> T,  val adapter: JsonObjectAdapter) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): List<T> {
-        val array = adapter.getArray(property.name)
+class JsonList<T : ObjectAdapter>(val construct: (adapter: JsonObjectAdapter) -> T) : ReadWriteProperty<ObjectAdapter, List<T>>{
+    override fun getValue(thisRef: ObjectAdapter, property: KProperty<*>): List<T> {
+        val array = thisRef.adapter.getArray(property.name)
         val adaptedList = array.objectIterator().asSequence() //
             .map { construct(it) } //
             .toList()
         return adaptedList
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
+    override fun setValue(thisRef: ObjectAdapter, property: KProperty<*>, value: List<T>) {
         // TODO map to right type of JsonArrayAdapter
-        val array = adapter.createArray()
+        val array = thisRef.adapter.createArray()
         value.map { it.adapter }.forEach { array.add(it) }
-        adapter.setArray(property.name, array)
+        thisRef.adapter.setArray(property.name, array)
     }
 }
 
